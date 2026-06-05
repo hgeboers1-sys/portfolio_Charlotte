@@ -151,11 +151,25 @@ sema_start = df["SEMA"].iloc[0]
 total_start = df["Total"].iloc[0]
 
 # P&L since first purchase (21 May 2026)
-COST_BASIS = 1 * 121.52 + 1 * 53.90   # 1x IWDA + 1x SEMA
-pnl_eur    = total_cur - COST_BASIS
-pnl_pct    = pnl_eur / COST_BASIS * 100
-pnl_sign   = "+" if pnl_eur >= 0 else ""
-pnl_color  = "#6ee7b7" if pnl_eur >= 0 else "#f87171"
+IWDA_COST      = 121.52                              # 1 share
+SEMA_COST      = 53.90                               # 1 share
+COST_BASIS     = IWDA_COST + SEMA_COST
+
+pnl_eur        = total_cur - COST_BASIS
+pnl_pct        = pnl_eur / COST_BASIS * 100
+pnl_sign       = "+" if pnl_eur >= 0 else ""
+pnl_color      = "#6ee7b7" if pnl_eur >= 0 else "#f87171"
+
+# Per-holding P&L
+pnl_iwda       = iwda_cur - IWDA_COST
+pnl_iwda_pct   = pnl_iwda / IWDA_COST * 100
+pnl_iwda_col   = "#6ee7b7" if pnl_iwda >= 0 else "#f87171"
+pnl_iwda_sign  = "+" if pnl_iwda >= 0 else ""
+
+pnl_sema       = sema_cur - SEMA_COST
+pnl_sema_pct   = pnl_sema / SEMA_COST * 100
+pnl_sema_col   = "#6ee7b7" if pnl_sema >= 0 else "#f87171"
+pnl_sema_sign  = "+" if pnl_sema >= 0 else ""
 
 def pct(cur, start):
     g = (cur - start) / start * 100
@@ -177,16 +191,22 @@ st.markdown(f"""
   <div class="holding">
     <div class="h-left">
       <span class="ticker">IWDA</span>
-      <span class="hname">iShares MSCI World · 1 share</span>
+      <span class="hname">iShares MSCI World · 1 share · bought € {IWDA_COST:.2f}</span>
     </div>
-    <span class="hprice">€ {iwda_cur:.2f}</span>
+    <div style="text-align:right">
+      <div class="hprice">€ {iwda_cur:.2f}</div>
+      <div style="font-size:11px;color:{pnl_iwda_col};margin-top:2px">{pnl_iwda_sign}€ {pnl_iwda:.2f} ({pnl_iwda_sign}{pnl_iwda_pct:.1f}%)</div>
+    </div>
   </div>
   <div class="holding">
     <div class="h-left">
       <span class="ticker">SEMA</span>
-      <span class="hname">iShares Emerging Markets · 1 share</span>
+      <span class="hname">iShares Emerging Markets · 1 share · bought € {SEMA_COST:.2f}</span>
     </div>
-    <span class="hprice">€ {sema_cur:.2f}</span>
+    <div style="text-align:right">
+      <div class="hprice">€ {sema_cur:.2f}</div>
+      <div style="font-size:11px;color:{pnl_sema_col};margin-top:2px">{pnl_sema_sign}€ {pnl_sema:.2f} ({pnl_sema_sign}{pnl_sema_pct:.1f}%)</div>
+    </div>
   </div>
   <div class="divider"></div>
   <div class="trow">
@@ -248,6 +268,17 @@ fig.add_trace(go.Scatter(
     name="SEMA",
     hovertemplate="<b>SEMA</b>  € %{y:.2f}<extra></extra>"
 ))
+
+# Buy marker
+fig.add_vline(
+    x=pd.Timestamp("2026-05-21"),
+    line_width=1.5, line_dash="dot",
+    line_color="rgba(255,255,255,0.25)",
+    annotation_text="Bought IWDA + SEMA",
+    annotation_position="top left",
+    annotation_font_color="rgba(255,255,255,0.45)",
+    annotation_font_size=10,
+)
 
 fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
