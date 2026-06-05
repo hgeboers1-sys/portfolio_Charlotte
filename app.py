@@ -150,6 +150,13 @@ iwda_start = df["IWDA"].iloc[0]
 sema_start = df["SEMA"].iloc[0]
 total_start = df["Total"].iloc[0]
 
+# P&L since first purchase (21 May 2026)
+COST_BASIS = 1 * 121.52 + 1 * 53.90   # 1x IWDA + 1x SEMA
+pnl_eur    = total_cur - COST_BASIS
+pnl_pct    = pnl_eur / COST_BASIS * 100
+pnl_sign   = "+" if pnl_eur >= 0 else ""
+pnl_color  = "#6ee7b7" if pnl_eur >= 0 else "#f87171"
+
 def pct(cur, start):
     g = (cur - start) / start * 100
     return f"{'+'if g>=0 else ''}{g:.1f}%"
@@ -186,7 +193,16 @@ st.markdown(f"""
     <span class="tlbl">Total value today</span>
     <span class="tval">€ {total_cur:.2f}</span>
   </div>
-  <div class="gbadge">{pct(total_cur, total_start)} since {df.index[0].strftime('%b %Y')}</div>
+  <div class="trow" style="margin-top:10px">
+    <span class="tlbl">Invested (cost basis)</span>
+    <span style="font-size:18px;font-weight:600;color:rgba(255,255,255,.6)">€ {COST_BASIS:.2f}</span>
+  </div>
+  <div class="divider"></div>
+  <div class="trow">
+    <span class="tlbl">P&amp;L since 21 May 2026</span>
+    <span style="font-size:28px;font-weight:800;color:{pnl_color}">{pnl_sign}€ {pnl_eur:.2f}</span>
+  </div>
+  <div class="gbadge" style="background:{'rgba(110,231,183,.12)' if pnl_eur>=0 else 'rgba(248,113,113,.12)'};color:{pnl_color}">{pnl_sign}{pnl_pct:.1f}% since 21 May 2026</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -194,12 +210,12 @@ st.markdown(f"""
 st.markdown(f"""
 <div class="stats-row">
   <div class="scard">
-    <div class="sval">{pct(total_cur, total_start)}</div>
-    <div class="slbl">Return since {df.index[0].strftime("%b '%y")}</div>
+    <div class="sval" style="color:{pnl_color}">{pnl_sign}€ {pnl_eur:.2f}</div>
+    <div class="slbl">P&amp;L since 21 May 2026</div>
   </div>
   <div class="scard">
-    <div class="sval">23</div>
-    <div class="slbl">Countries invested in</div>
+    <div class="sval" style="color:{pnl_color}">{pnl_sign}{pnl_pct:.1f}%</div>
+    <div class="slbl">Return on investment</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
