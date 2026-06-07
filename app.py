@@ -269,16 +269,23 @@ fig.add_trace(go.Scatter(
     hovertemplate="<b>SEMA</b>  € %{y:.2f}<extra></extra>"
 ))
 
-# Buy marker
-fig.add_vline(
-    x=pd.Timestamp("2026-05-21"),
-    line_width=1.5, line_dash="dot",
-    line_color="rgba(255,255,255,0.25)",
-    annotation_text="Bought IWDA + SEMA",
-    annotation_position="top left",
-    annotation_font_color="rgba(255,255,255,0.45)",
-    annotation_font_size=10,
-)
+# Buy marker — snap to nearest weekly date in df
+def nearest_row(target_str):
+    t = pd.Timestamp(target_str)
+    idx = (df.index - t).abs().argmin()
+    return df.index[idx], df["Total"].iloc[idx]
+
+bx, by = nearest_row("2026-05-21")
+fig.add_trace(go.Scatter(
+    x=[bx], y=[by],
+    mode="markers+text",
+    marker=dict(size=10, color=ACCENT, line=dict(color="#fff", width=2)),
+    text=["Bought IWDA + SEMA"],
+    textposition="top right",
+    textfont=dict(color="rgba(255,255,255,0.6)", size=10),
+    name="Buy", showlegend=False,
+    hovertemplate="<b>%{text}</b><extra></extra>",
+))
 
 fig.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
