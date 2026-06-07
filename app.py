@@ -272,7 +272,7 @@ fig.add_trace(go.Scatter(
 # Buy marker — snap to nearest weekly date in df
 def nearest_row(target_str):
     t = pd.Timestamp(target_str)
-    idx = (df.index - t).abs().argmin()
+    idx = df.index.get_indexer([t], method="nearest")[0]
     return df.index[idx], df["Total"].iloc[idx]
 
 bx, by = nearest_row("2026-05-21")
